@@ -1,0 +1,5 @@
+[versions]
+gluonSubstrate = "0.0.64"
+
+[libraries]
+gluonSubstrate = { group = "com.gluonhq", name = "substrate", version.ref = "gluonSubstrate" }
