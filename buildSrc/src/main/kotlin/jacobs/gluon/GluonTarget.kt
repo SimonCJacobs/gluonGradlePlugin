@@ -14,4 +14,13 @@ enum class GluonTarget {
     };
 
     abstract val gluonProfile: Profile
+
+    val nameCamelCase: String
+        get() = nameTitleCase.replaceFirstChar { it.lowercase() }
+
+    val nameTitleCase: String
+        get() = name.split("_")
+            .joinToString("") { chunk ->
+                chunk.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+            }
 }
