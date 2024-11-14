@@ -44,6 +44,10 @@ abstract class GluonSubstrateTask : GluonTask() {
         get() = project.name
 
     @get: Internal
+    protected val projectDescription: String
+        get() = project.description ?: error("Must specify a project description")
+
+    @get: Internal
     protected val projectVersion: String
         get() = if (project.version == Project.DEFAULT_VERSION)
                 error("Must specify a project version")

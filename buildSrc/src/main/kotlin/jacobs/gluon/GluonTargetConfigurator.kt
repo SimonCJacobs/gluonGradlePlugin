@@ -32,6 +32,7 @@ class GluonTargetConfigurator(
                 dependsOn(gluonCompile)
             }
             registerGluonSubstrateTask<GluonPackage>("gluonPackage", targetObject) {
+                vendorName.set(configuration.releaseExtension.vendorName)
                 dependsOn(gluonLink)
             }
             registerGluonTask<GluonRunTask>(targetTaskName("gluonRun", targetObject), configuration) {

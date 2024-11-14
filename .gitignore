@@ -2,3 +2,4 @@
 .idea/
 .kotlin/
 build/
+*.icns # Annoyingly Gluon generates this in the src folder

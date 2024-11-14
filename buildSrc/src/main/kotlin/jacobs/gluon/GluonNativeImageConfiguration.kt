@@ -34,6 +34,7 @@ abstract class GluonNativeImageConfiguration(private val project: Project) {
     }
 
     abstract class ReleaseConfiguration {
+        abstract val vendorName: Property<String>
         abstract val signingIdentity: Property<String>
     }
 
