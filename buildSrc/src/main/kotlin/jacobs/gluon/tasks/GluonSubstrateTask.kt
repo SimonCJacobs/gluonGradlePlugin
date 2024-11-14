@@ -2,9 +2,11 @@ package jacobs.gluon.tasks
 
 import com.gluonhq.substrate.ProjectConfiguration
 import com.gluonhq.substrate.SubstrateDispatcher
+import com.gluonhq.substrate.model.ReleaseConfiguration
 import com.gluonhq.substrate.model.Triplet
 import jacobs.gluon.GluonNativeImagePlugin
 import jacobs.gluon.GluonTarget
+import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.internal.tasks.JvmConstants
@@ -31,8 +33,8 @@ abstract class GluonSubstrateTask : GluonTask() {
     @get:Input
     abstract val graalCompilerArgs: ListProperty<String>
 
-    @get:Input @get:Optional
-    abstract val target: Property<GluonTarget?>
+    @get:Input
+    abstract val target: Property<GluonTarget>
 
     @get:InputDirectory
     abstract val tracingDirectory: DirectoryProperty
@@ -41,6 +43,13 @@ abstract class GluonSubstrateTask : GluonTask() {
     protected val appName: String
         get() = project.name
 
+    @get: Internal
+    protected val projectVersion: String
+        get() = if (project.version == Project.DEFAULT_VERSION)
+                error("Must specify a project version")
+            else
+                project.version.toString()
+
     protected fun gluonBuildDirectory(): Provider<Directory> {
         return gluonDirectory.flatMap { gluonDir ->
             project.layout.buildDirectory.dir(gluonDir)
@@ -48,20 +57,24 @@ abstract class GluonSubstrateTask : GluonTask() {
     }
 
     protected fun targetTriplet(): Provider<Triplet> {
-        return target.map { t -> t?.let { Triplet(it.gluonProfile) } ?: Triplet.fromCurrentOS() }
+        return target.map { Triplet(it.gluonProfile) }
     }
 
-    protected fun createDispatcher(): SubstrateDispatcher {
-        return SubstrateDispatcher(gluonBuildDirectory().get().asFile.toPath(), compileSubstrateConfig())
+    protected fun createDispatcher(releaseConfiguration: ReleaseConfiguration.() -> Unit = {}): SubstrateDispatcher {
+        return SubstrateDispatcher(
+            gluonBuildDirectory().get().asFile.toPath(),
+            compileSubstrateConfig(releaseConfiguration)
+        )
     }
 
-    private fun compileSubstrateConfig(): ProjectConfiguration {
+    private fun compileSubstrateConfig(releaseConfiguration: ReleaseConfiguration.() -> Unit): ProjectConfiguration {
         val mainClassName = project.the<JavaApplication>().mainClass.get()
         val substrateConfig = ProjectConfiguration(mainClassName, getClasspath())
         substrateConfig.appName = appName
         substrateConfig.compilerArgs = graalCompilerArgs.get()
         substrateConfig.graalPath = pathToGluonJvm.get().asFile.toPath()
         substrateConfig.setTarget(targetTriplet().get())
+        substrateConfig.releaseConfiguration.apply(releaseConfiguration)
         return substrateConfig
     }
 
