@@ -43,11 +43,11 @@ abstract class GluonSubstrateTask : GluonTask() {
     protected val appName: String
         get() = project.name
 
-    @get: Internal
+    @get:Internal
     protected val projectDescription: String
         get() = project.description ?: error("Must specify a project description")
 
-    @get: Internal
+    @get:Internal
     protected val projectVersion: String
         get() = if (project.version == Project.DEFAULT_VERSION)
                 error("Must specify a project version")
@@ -73,7 +73,9 @@ abstract class GluonSubstrateTask : GluonTask() {
 
     private fun compileSubstrateConfig(releaseConfiguration: ReleaseConfiguration.() -> Unit): ProjectConfiguration {
         val mainClassName = project.the<JavaApplication>().mainClass.get()
-        val substrateConfig = ProjectConfiguration(mainClassName, getClasspath())
+        val classpath = getClasspath()
+        project.logger.info("Creating Gluon project using classpath $classpath")
+        val substrateConfig = ProjectConfiguration(mainClassName, classpath)
         substrateConfig.appName = appName
         substrateConfig.compilerArgs = graalCompilerArgs.get()
         substrateConfig.graalPath = pathToGluonJvm.get().asFile.toPath()

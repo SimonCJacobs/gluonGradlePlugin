@@ -29,6 +29,7 @@ abstract class GraalTracingAgent : GluonTask() {
             runOnGluonJvm()
             setAsRunOfNativeImageAgent()
             completeJvmArguments()
+            project.logger.info("Commencing tracing")
             exec()
         }
     }
